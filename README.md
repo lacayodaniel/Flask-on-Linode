@@ -46,12 +46,25 @@ cd flask_app_project
 ```
 3. Create and activate a virtualenv
 ```
+# using pip and venv
 virtualenv venv
 source venv/bin/activate
+
+# using conda
+conda create -n flask_app
+conda activate flask_app
+
+# *** TIP ***
+conda deactivate
+# return to base shell
 ```
 4. Install packages
 ```
+# using pip
 pip install -r flask_app/requirements.txt
+
+# using conda
+conda install --file flask_app/requirements.txt
 ```
 5. Create Flask environment variables
 ```
@@ -61,6 +74,10 @@ export FLASK_ENV=development
 6. Run it
 ```
 flask run
+
+# *** TIP ***
+CNTRL + C 
+# quit flask app return to base shell
 ```
 
 ## Next Steps
