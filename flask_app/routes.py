@@ -137,7 +137,7 @@ def weeee():
 @app.route('/c4b/showMove', methods = ['GET', 'POST'])
 def showMove():
     df_move = pd.read_csv('./pain.csv')
-    return render_template('showMove.html', move = df_move['Column'].iloc[-1])
+    return render_template('showMove.html', move = df_move['Column'].iloc[-1], turn = df_move['Turn'].iloc[-1])
 
 
 
