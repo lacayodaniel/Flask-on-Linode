@@ -6,6 +6,11 @@ from flask_app import app, db
 from flask_app.models import User, Post
 from flask_app.forms import PostForm
 
+import csv
+import pandas as pd
+import time
+import numpy as np
+
 @app.route("/")
 def index():
     db.create_all()
@@ -13,9 +18,11 @@ def index():
     return render_template("index.html", posts=posts)
 
 
+
 @app.route("/about")
 def about():
     return render_template("index.html")
+
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -54,6 +61,86 @@ def register():
             return redirect(url_for('index'))
 
 
+
+@app.route('/c4b/start', methods = ['GET', 'POST'])
+def start():
+    titles = ['Turn', 'Column']
+    fill = [0,0]
+    with open('./pain.csv', 'w') as f:
+      
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        
+        write.writerow(titles)
+        write.writerow(fill)
+
+    string = ''
+    for i in range(42):
+        string += str(0)
+
+    with open('./gamestate.txt', 'w') as f:
+        # using csv.writer method from CSV package
+        f.write(string)
+
+    # check if existing sql-alchemy db w/ name "game"
+    # if it exists destroy it
+    # then make a new db under name game, with ['turn', 'move',]
+    return (redirect(url_for('getMove')))
+
+
+
+@app.route('/c4b/makemove', methods = ['GET', 'POST'])
+def getMove():
+    f = open("gamestate.txt", "r")
+    game = f.read()
+    f.close()
+    gamestate = []
+    for row in np.ndarray.tolist(make_board(game)):
+        gamestate.append('|'.join(row))
+    
+    return render_template('connect4.html', game = gamestate)
+
+
+def make_board(game):
+    gamestate = np.zeros((6,7))
+    print(gamestate)
+    j=0
+    l=0
+    for i in range(42): # total rows
+        gamestate[j][l] = int(game[i])
+        l += 1
+        if l % 7==0:
+            j+=1
+            l=0
+            
+    return np.array(np.array(gamestate, dtype=np.intc), dtype=np.str_)
+
+@app.route('/redirect/', methods = ['GET', 'POST'])
+def weeee():
+    email_2 = request.form.get('column')
+    df_Cur = pd.read_csv('pain.csv')
+    turn = df_Cur['Turn'].iloc[-1]
+    data = [turn+1, email_2]
+    df_move = pd.read_csv('./pain.csv')
+
+    with open('./pain.csv', 'a') as f:
+      
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        
+        write.writerow(data)
+
+    return redirect(url_for('showMove'))
+
+
+
+@app.route('/c4b/showMove', methods = ['GET', 'POST'])
+def showMove():
+    df_move = pd.read_csv('./pain.csv')
+    return render_template('showMove.html', move = df_move['Column'].iloc[-1])
+
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -78,6 +165,28 @@ def login():
             flash('Incorrect Login!', 'danger')
             return render_template('login.html')
 
+@app.route('/theBoard/<gamestate>/<turn>')
+def theBoard(gamestate, turn):
+    df = pd.read_csv('pain.csv')
+    while not (int(pd.read_csv('pain.csv')['Turn'].iloc[-1]) == int(turn)):
+        time.sleep(2)
+        print("sleep")
+        continue
+
+    state = str(gamestate)
+    col = df['Column'].iloc[-1]
+    with open('./gamestate.txt', 'w') as f:
+        # using csv.writer method from CSV package
+        f.write(state)
+
+    # with open('./gamestate.txt', 'w') as f:
+    #     f.write(gamestate)
+    #     # using csv.writer method from CSV package
+    #     # write = csv.writer(f)
+    #     # write.writerow(gamestate)
+    
+    return render_template('showMove.html', move = col)
+
 
 @app.route("/logout")
 def logout():
@@ -85,7 +194,89 @@ def logout():
     flash('Logged out!', 'success')
     return redirect(url_for('index'))
 
+'''
+@app.route("/C4B/start", methods=['POST', 'GET'])
+def connectFourStart():
+    # Write to element of sql database then remove element in the connect 4 code
+    # Start script so ig
+    '''
 
+'''When button pressed redirect to c4b play, have function for first time play--Probably something creative in the db
+    Need an import statement for these
+    start_state = init_board()
+    play_game(start_state)'''
+    
+'''
+    global turn, run, state, nextp
+
+    turn = 0
+    run = True
+    state = init_board()
+    nextp = next_player(state)
+    
+    return render_template('connect4_start.html')
+
+
+@app.route("/C4B/play", methods=['GET', 'POST'])
+def connectFourPlay():
+    # global MOVES_LEFT
+    # cb4.print_board(state)
+    global turn, run, state, nextp
+
+    
+
+    while run:
+        # player = player1 if next_player(state) == 1 else player2
+
+        if (nextp):
+            # computer move
+            move, state_next = get_move(state)
+            # MAX max Max Maxwell maxwell  your code here
+            # move is an int with range [0-6] inclusive, corresponding to a column
+
+        else:
+            
+           
+            move = None
+            while move not in state:
+                try:
+                    move = request.form.get('player_column')
+                    # instead of input here do the form get?
+                    # wait until there is a value in the form get yeah probably the purpose of the submit button
+                except ValueError:
+                    continue
+            
+            state = dict(successors(state))
+            # max your code here
+            # move = wait_for_move() # column number human chose [0-6]
+            state_next = update_board_with_move(state, move) # keep line
+            
+
+        # MOVES_LEFT -= 1
+
+        print("Turn {}:".format(turn))
+        print("Player {} moves to column {}".format(1 if nextp else 2, move))
+        print_board(state_next)
+
+        turn += 1
+        state = state_next
+        if (is_full(state) or has_win(state)):
+            run = False
+        nextp = 1 - nextp
+
+    score1, score2 = scores(state)
+    if score1 > score2:
+        print("Player 1 wins!")
+    elif score1 < score2:
+        print("Player 2 wins!")
+    else:
+        print("It's a tie.")
+    
+    # Write to element of sql database then remove element in the connect 4 code
+    
+    return render_template('connect4.html')
+
+'''
 # Check if username or email are already taken
 def user_exsists(username, email):
     # Get all Users in SQL
@@ -96,6 +287,8 @@ def user_exsists(username, email):
 
     # No matching user
     return False
+
+    
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
@@ -111,10 +304,12 @@ def new_post():
                            form=form, legend='New Post')
 
 
+
 @app.route("/post/<int:post_id>")
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post.html', title=post.title, post=post)
+
 
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
@@ -135,6 +330,7 @@ def update_post(post_id):
         form.content.data = post.content
     return render_template('create_post.html', title='Update Post',
                            form=form, legend='Update Post')
+
 
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])

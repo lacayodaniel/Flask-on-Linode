@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+
+{% for row in game %}
+  {{row}}<br/>
+{% endfor %}
+
+<div class="container">
+  <form action="/redirect/" method="POST">
+
+    <div class="form-group">
+      <label for="column">column</label>
+      <input class="form-control" id="column" name="column" placeholder="Select Column">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+  </form>
+</div>
+
+{% endblock content %}
