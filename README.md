@@ -46,17 +46,36 @@ cd flask_app_project
 ```
 3. Create and activate a virtualenv
 ```
-# using pip and venv
-virtualenv venv
-source venv/bin/activate
+# (Mac) using pip and venv to create a new virtual env
+virtualenv <envName>
 
-# using conda
-conda create -n flask_app
-conda activate flask_app
+# activate the env
+source <envName>/bin/activate
 
-# *** TIP ***
+# deactivate the env DONT FORGET TODO WHEN YOURE DONE
+source <envName>/bin/deactivate
+
+# **************************************************************************
+
+# (Windows) using pip and venv to create a new virtual env
+virtualenv <envName>
+
+# activate the env
+source .<envName>/bin/activate
+
+# deactivate the env DONT FORGET TODO WHEN YOURE DONE
+source .<envName>/bin/deactivate
+
+# **************************************************************************
+
+# using conda create new virtual env
+conda create -n <envName>
+
+# activate the env
+conda activate <envName>
+
+# deactivate the env DONT FORGET TODO WHEN YOURE DONE
 conda deactivate
-# return to base shell
 ```
 4. Install packages
 ```
