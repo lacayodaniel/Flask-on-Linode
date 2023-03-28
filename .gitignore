@@ -3,3 +3,5 @@ flask_app/__pycache__
 venv
 *.pyc
 /instance
+gamestate.txt
+pain.csv

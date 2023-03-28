@@ -185,7 +185,8 @@ def theBoard(gamestate, turn):
     #     # write = csv.writer(f)
     #     # write.writerow(gamestate)
     
-    return render_template('showMove.html', move = col)
+    return (redirect(url_for('getMove')))
+    # return render_template('showMove.html', move = col)
 
 
 @app.route("/logout")
