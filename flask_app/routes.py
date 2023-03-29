@@ -114,8 +114,11 @@ def login():
 
 @app.route('/c4b/start', methods = ['GET', 'POST'])
 def start():
-    titles = ['Turn', 'Column']
-    fill = [0,0]
+    titles = ['Player', 'Column']
+    fill = [0,0] # this may be unnecessary
+    # 'w' call rewrite the file each time, so all past entries will be deleted
+    # pain.csv has the turn and column, however considering changing this to player
+    
     with open('./pain.csv', 'w') as f:
       
         # using csv.writer method from CSV package
@@ -142,9 +145,8 @@ def start():
 
 @app.route('/c4b/makemove', methods = ['GET', 'POST'])
 def getMove():
-    f = open("gamestate.txt", "r")
-    game = f.read()
-    f.close()
+    f = pd.read_csv("gamestate.csv")
+    game = f['gamestate'].iloc[-1]
     gamestate = []
     for row in np.ndarray.tolist(make_board(game)):
         gamestate.append('|'.join(row))
@@ -179,18 +181,21 @@ def getGamestate(gamestate):
     return redirect(url_for(theBoard))
 
 
-@app.route('/c4b/<turn>')
-def theBoard(turn):
+@app.route('/c4b/<player>')
+def theBoard(player):
     df = pd.read_csv('pain.csv')
-    while not (int(pd.read_csv('pain.csv')['Turn'].iloc[-1]) == int(turn)):
-        time.sleep(2)
+    lastPlayer = int(pd.read_csv('pain.csv')['Player'].iloc[-1])
+    # get last index of the column 'Turn'
+    while ( lastPlayer == int(player)):
+        time.sleep(2) # average time to make a move
         print("sleep")
         continue
 
-    
+    # get the last move that was made
     col = df['Column'].iloc[-1]
 
-    
+    # once the column has been "GET"
+    # change the player #, so has to wait until the remote player makes a move
 
     # with open('./gamestate.txt', 'w') as f:
     #     f.write(gamestate)
@@ -199,6 +204,8 @@ def theBoard(turn):
     #     # write.writerow(gamestate)
     
     return render_template('showMove.html', move = col)
+
+# on pico side after getting the column from 'theBoard' then should go to the url getGamestate passing the gamestate
 
 
 @app.route("/logout")
