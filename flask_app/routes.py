@@ -61,60 +61,6 @@ def register():
             return redirect(url_for('index'))
 
 
-
-@app.route('/c4b/start', methods = ['GET', 'POST'])
-def start():
-    titles = ['Turn', 'Column']
-    fill = [0,0]
-    with open('./pain.csv', 'w') as f:
-      
-        # using csv.writer method from CSV package
-        write = csv.writer(f)
-        
-        write.writerow(titles)
-        write.writerow(fill)
-
-    string = ''
-    for i in range(42):
-        string += str(0)
-
-    with open('./gamestate.txt', 'w') as f:
-        # using csv.writer method from CSV package
-        f.write(string)
-
-    # check if existing sql-alchemy db w/ name "game"
-    # if it exists destroy it
-    # then make a new db under name game, with ['turn', 'move',]
-    return (redirect(url_for('getMove')))
-
-
-
-@app.route('/c4b/makemove', methods = ['GET', 'POST'])
-def getMove():
-    f = open("gamestate.txt", "r")
-    game = f.read()
-    f.close()
-    gamestate = []
-    for row in np.ndarray.tolist(make_board(game)):
-        gamestate.append('|'.join(row))
-    
-    return render_template('connect4.html', game = gamestate)
-
-
-def make_board(game):
-    gamestate = np.zeros((6,7))
-    print(gamestate)
-    j=0
-    l=0
-    for i in range(42): # total rows
-        gamestate[j][l] = int(game[i])
-        l += 1
-        if l % 7==0:
-            j+=1
-            l=0
-            
-    return np.array(np.array(gamestate, dtype=np.intc), dtype=np.str_)
-
 @app.route('/redirect/', methods = ['GET', 'POST'])
 def weeee():
     email_2 = request.form.get('column')
@@ -165,19 +111,86 @@ def login():
             flash('Incorrect Login!', 'danger')
             return render_template('login.html')
 
-@app.route('/theBoard/<gamestate>/<turn>')
-def theBoard(gamestate, turn):
+
+@app.route('/c4b/start', methods = ['GET', 'POST'])
+def start():
+    titles = ['Turn', 'Column']
+    fill = [0,0]
+    with open('./pain.csv', 'w') as f:
+      
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        
+        write.writerow(titles)
+        write.writerow(fill)
+
+    string = ''
+    for i in range(42):
+        string += str(0)
+
+    with open('./gamestate.csv', 'w') as f:
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerow(['Player', 'Gamestate'])
+        write.writerow(['1', string])
+
+    # check if existing sql-alchemy db w/ name "game"
+    # if it exists destroy it
+    # then make a new db under name game, with ['turn', 'move',]
+    return (redirect(url_for('getMove')))
+
+
+@app.route('/c4b/makemove', methods = ['GET', 'POST'])
+def getMove():
+    f = open("gamestate.txt", "r")
+    game = f.read()
+    f.close()
+    gamestate = []
+    for row in np.ndarray.tolist(make_board(game)):
+        gamestate.append('|'.join(row))
+    
+    return render_template('connect4.html', game = gamestate)
+
+
+def make_board(game):
+    gamestate = np.zeros((6,7))
+    print(gamestate)
+    j=0
+    l=0
+    for i in range(42): # total rows
+        gamestate[j][l] = int(game[i])
+        l += 1
+        if l % 7==0:
+            j+=1
+            l=0
+            
+    return np.array(np.array(gamestate, dtype=np.intc), dtype=np.str_)
+
+
+@app.route('/c4b/<gamestate>')
+def getGamestate(gamestate):
+    state = str(gamestate)
+    player = 1
+    with open('./gamestate.csv', 'w') as f:
+        # using csv.writer method from CSV package
+        f.write(player, state)
+
+    
+    return redirect(url_for(theBoard))
+
+
+@app.route('/c4b/<turn>')
+def theBoard(turn):
     df = pd.read_csv('pain.csv')
     while not (int(pd.read_csv('pain.csv')['Turn'].iloc[-1]) == int(turn)):
         time.sleep(2)
         print("sleep")
         continue
 
-    state = str(gamestate)
+    
     col = df['Column'].iloc[-1]
-    with open('./gamestate.txt', 'w') as f:
-        # using csv.writer method from CSV package
-        f.write(state)
+
+    
 
     # with open('./gamestate.txt', 'w') as f:
     #     f.write(gamestate)
