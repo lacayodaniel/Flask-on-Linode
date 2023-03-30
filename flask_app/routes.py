@@ -64,10 +64,8 @@ def register():
 @app.route('/redirect/', methods = ['GET', 'POST'])
 def weeee():
     email_2 = request.form.get('column')
-    df_Cur = pd.read_csv('pain.csv')
-    turn = df_Cur['Turn'].iloc[-1]
-    data = [turn+1, email_2]
-    df_move = pd.read_csv('./pain.csv')
+    data = [1, email_2]
+    #df_move = pd.read_csv('./pain.csv')
 
     with open('./pain.csv', 'a') as f:
       
@@ -76,7 +74,7 @@ def weeee():
         
         write.writerow(data)
 
-    return redirect(url_for('showMove'))
+    return redirect(url_for('getMove'))
 
 
 
@@ -135,7 +133,7 @@ def start():
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerow(['Player', 'Gamestate'])
-        write.writerow(['1', string])
+        write.writerow(['0', string])
 
     # check if existing sql-alchemy db w/ name "game"
     # if it exists destroy it
@@ -145,11 +143,26 @@ def start():
 
 @app.route('/c4b/makemove', methods = ['GET', 'POST'])
 def getMove():
-    f = pd.read_csv("gamestate.csv")
-    game = f['gamestate'].iloc[-1]
+    while (0 == int(pd.read_csv('gamestate.csv')['Player'].iloc[-1])):
+        time.sleep(3) # average time to make a move
+        # print("sleep")
+        continue
+
+    f = pd.read_csv("gamestate.csv", dtype=str)
+    game = str(f['Gamestate'].iloc[-1])
     gamestate = []
     for row in np.ndarray.tolist(make_board(game)):
         gamestate.append('|'.join(row))
+
+    fill = [0,0] # this may be unnecessary
+    # 'w' call rewrite the file each time, so all past entries will be deleted
+    # pain.csv has the turn and column, however considering changing this to player
+    
+    with open('./gamestate.csv', 'a') as f:
+      
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerow(fill)
     
     return render_template('connect4.html', game = gamestate)
 
@@ -159,6 +172,8 @@ def make_board(game):
     print(gamestate)
     j=0
     l=0
+    print(game)
+    print(type(game))
     for i in range(42): # total rows
         gamestate[j][l] = int(game[i])
         l += 1
@@ -169,31 +184,34 @@ def make_board(game):
     return np.array(np.array(gamestate, dtype=np.intc), dtype=np.str_)
 
 
-@app.route('/c4b/<gamestate>')
+@app.route('/c4b/game/<gamestate>')
 def getGamestate(gamestate):
     state = str(gamestate)
     player = 1
-    with open('./gamestate.csv', 'w') as f:
+    with open('./gamestate.csv', 'a') as f:
         # using csv.writer method from CSV package
-        f.write(player, state)
+        write = csv.writer(f)
+        write.writerow([player, state])
 
     
-    return redirect(url_for(theBoard))
+    return redirect('/c4b/p/1')
 
 
-@app.route('/c4b/<player>')
-def theBoard(player):
-    df = pd.read_csv('pain.csv')
-    lastPlayer = int(pd.read_csv('pain.csv')['Player'].iloc[-1])
+@app.route('/c4b/p')
+def theBoard():
+    
+    # lastPlayer = int(pd.read_csv('pain.csv')['Player'].iloc[-1])
     # get last index of the column 'Turn'
-    while ( lastPlayer == int(player)):
+    while (0 == int(pd.read_csv('pain.csv')['Player'].iloc[-1])):
         time.sleep(2) # average time to make a move
-        print("sleep")
+        # print("sleep")
         continue
 
+    df = pd.read_csv('pain.csv')
     # get the last move that was made
     col = df['Column'].iloc[-1]
 
+    
     # once the column has been "GET"
     # change the player #, so has to wait until the remote player makes a move
 
