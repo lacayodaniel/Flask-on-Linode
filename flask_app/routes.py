@@ -143,7 +143,8 @@ def start():
 
 @app.route('/c4b/makemove', methods = ['GET', 'POST'])
 def getMove():
-    while (0 == int(pd.read_csv('gamestate.csv')['Player'].iloc[-1])):
+    while (1 == int(pd.read_csv('pain.csv')['Player'].iloc[-1])):
+        # while == 1 means the remote player made the most recent move
         time.sleep(3) # average time to make a move
         # print("sleep")
         continue
@@ -193,8 +194,12 @@ def getGamestate(gamestate):
         write = csv.writer(f)
         write.writerow([player, state])
 
+    with open('./pain.csv', 'a') as f:
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerow([0, 0])
     
-    return redirect('/c4b/p/1')
+    return redirect('/c4b/p')
 
 
 @app.route('/c4b/p')
@@ -203,6 +208,7 @@ def theBoard():
     # lastPlayer = int(pd.read_csv('pain.csv')['Player'].iloc[-1])
     # get last index of the column 'Turn'
     while (0 == int(pd.read_csv('pain.csv')['Player'].iloc[-1])):
+        # while 0 means the client made the most recent move
         time.sleep(2) # average time to make a move
         # print("sleep")
         continue
