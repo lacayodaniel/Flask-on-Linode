@@ -153,7 +153,7 @@ def getMove():
     game = str(f['Gamestate'].iloc[-1])
     gamestate = []
     for row in np.ndarray.tolist(make_board(game)):
-        gamestate.append('|'.join(row))
+        gamestate.append(' '.join(row))
 
     fill = [0,0] # this may be unnecessary
     # 'w' call rewrite the file each time, so all past entries will be deleted
@@ -169,20 +169,27 @@ def getMove():
 
 
 def make_board(game):
-    gamestate = np.zeros((6,7))
+    gamestate = np.zeros((6,7),dtype=np.str_)
     print(gamestate)
     j=0
     l=0
     print(game)
     print(type(game))
     for i in range(42): # total rows
-        gamestate[j][l] = int(game[i])
+        # gamestate[j][l] = int(game[i])
+        if game[i] == "2":
+            gamestate[j][l] = "O"
+        elif game[i] == "1":
+            gamestate[j][l] = "X"
+        else:
+            gamestate[j][l] = "-"
+        
         l += 1
         if l % 7==0:
             j+=1
             l=0
             
-    return np.array(np.array(gamestate, dtype=np.intc), dtype=np.str_)
+    return np.array(np.array(gamestate, dtype=np.str_), dtype=np.str_)
 
 
 @app.route('/c4b/game/<gamestate>')
