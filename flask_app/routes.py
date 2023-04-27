@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from passlib.hash import sha256_crypt
 
@@ -233,8 +233,9 @@ def theBoard():
     #     # using csv.writer method from CSV package
     #     # write = csv.writer(f)
     #     # write.writerow(gamestate)
-    
-    return render_template('showMove.html', move = col)
+    data = {"move": str(col)}
+    return jsonify(data)
+    # return render_template('showMove.html', move = col)
 
 # on pico side after getting the column from 'theBoard' then should go to the url getGamestate passing the gamestate
 
